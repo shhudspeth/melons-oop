@@ -2,6 +2,9 @@
 # Part 1   #
 ############
 
+import re
+import sys
+
 
 class MelonType(object):
     """A species of melon at a melon farm."""
@@ -115,6 +118,7 @@ def make_melons(melon_types):
     # Fill in the rest
     # dictionary of melon types
     melons_by_id = make_melon_type_lookup(melon_types)
+    # make sample melon instances
     melon_1 = Melon(melons_by_id['yw'], 8,7, 2, 'Sheila')
     melon_2 = Melon(melons_by_id['yw'], 3, 4, 2, 'Sheila')
     melon_3 = Melon(melons_by_id['yw'], 9, 8, 3, 'Sheila')
@@ -127,6 +131,28 @@ def make_melons(melon_types):
 
     return [melon_1, melon_2, melon_3, melon_4, melon_5, melon_6, melon_7, melon_8, melon_9]
 
+def read_and_create_melons(filename, melon_types):
+    latest_harvest_info = []
+    # open log of melon harvest
+    melon_log = open(filename)   
+
+    # regex expressions
+    find_attrib = re.compile(r"Shape\s([\d]+)\sColor\s([\d]+)\sType\s([a-z]+)\sHarvested\sBy\s(\w+)\sField\s#\s([\d]+)")
+    
+    # load dictionary of melon type instances
+    melons_by_id = make_melon_type_lookup(melon_types)
+
+    for line in melon_log.read().split("\n"):
+        matches = find_attrib.search(line)
+        shape = matches[1]
+        color = matches[2]
+        type_melon = matches[3]
+        harvest_person = matches[4]
+        field_num = matches[5]
+        new_melon = Melon(melons_by_id[type_melon], shape, color, field_num, harvest_person)
+        latest_harvest_info.append(new_melon)
+    
+    return (latest_harvest_info)
 def get_sellability_report(melons):
     """Given a list of melon object, prints whether each one is sellable."""
 
@@ -137,6 +163,16 @@ def get_sellability_report(melons):
         else:
             sell_yes_or_no = "(NOT SELLABLE)" 
 
-        print(f"Harvested by{melon.harvested_by} from Field {melon.harvest_field} {sell_yes_or_no}")
+        print(f"Harvested by {melon.harvested_by} from Field {melon.harvest_field} {sell_yes_or_no}")
 
 
+if __name__ == '__main__':
+    # python3 markov text.txt no_n_grams
+    input_path = sys.argv[1]
+    # Open the file and create melons
+    melon_type_list = make_melon_types()
+    melon_types = make_melon_type_lookup(melon_type_list)
+    harvest_info = read_and_create_melons(input_path, melon_types)
+    get_sellability_report(harvest_info)
+    
+    
