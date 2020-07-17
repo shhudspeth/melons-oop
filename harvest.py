@@ -139,38 +139,41 @@ def read_and_create_melons(filename, melon_types):
     # regex expressions
     find_attrib = re.compile(r"Shape\s([\d]+)\sColor\s([\d]+)\sType\s([a-z]+)\sHarvested\sBy\s(\w+)\sField\s#\s([\d]+)")
     
-    # load dictionary of melon type instances
-    melons_by_id = make_melon_type_lookup(melon_types)
-
     for line in melon_log.read().split("\n"):
         matches = find_attrib.search(line)
-        shape = matches[1]
-        color = matches[2]
+        shape = int(matches[1])
+        color = int(matches[2])
         type_melon = matches[3]
         harvest_person = matches[4]
-        field_num = matches[5]
-        new_melon = Melon(melons_by_id[type_melon], shape, color, field_num, harvest_person)
+        field_num = int(matches[5])
+        new_melon = Melon(melon_types[type_melon], shape, color, field_num, harvest_person)
         latest_harvest_info.append(new_melon)
     
     return (latest_harvest_info)
+
+
 def get_sellability_report(melons):
     """Given a list of melon object, prints whether each one is sellable."""
-
+    to_sell = 0
+    not_sellable = 0
     # Fill in the rest 
     for melon in melons:
         if melon.can_sell:
             sell_yes_or_no = "(CAN BE SOLD)"
+            to_sell += 1
         else:
-            sell_yes_or_no = "(NOT SELLABLE)" 
+            sell_yes_or_no = "(NOT SELLABLE)"
+            not_sellable += 1
 
         print(f"Harvested by {melon.harvested_by} from Field {melon.harvest_field} {sell_yes_or_no}")
-
+    print(f"{to_sell} Melons are ready to sell. {not_sellable} are not.")
 
 if __name__ == '__main__':
     # python3 markov text.txt no_n_grams
     input_path = sys.argv[1]
     # Open the file and create melons
     melon_type_list = make_melon_types()
+    print(melon_type_list)
     melon_types = make_melon_type_lookup(melon_type_list)
     harvest_info = read_and_create_melons(input_path, melon_types)
     get_sellability_report(harvest_info)
